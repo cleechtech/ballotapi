@@ -1,0 +1,125 @@
+<!-- This is an exploration of ways to do data entry for our data. -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>JavaScript Tests</title>
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+    </head>
+    <body>
+        <button id="measure-button">Measure</button>
+        <button id="election-button">Election</button>
+        <label for="#office-input">Office: </label>
+        <input type="text" id="office-input"/>
+        <label for="#candidate-name-input">Name: </label>
+        <input type="text" id="candidate-name-input"/>
+        <label for="candidate-party-input">Party: </label>
+        <input type="text" id="candidate-party-input"/>
+        <button id="add-candidate-button">Add Candidate</button>
+        <table id="candidate-table"></table>
+         
+        <script>//These scripts must be placed AFTER the html it references.
+
+            //Clear all text boxes on the page on page load.
+            $(document).ready(function() {
+                $('input[type=text]').each(function() {
+                    $(this).val('');
+                });
+            });
+
+            // Initialize ballotData JSON.
+            var ballotData = {"candidates":[]};
+
+            /* Measure or Election Buttons */
+            $("#measure-button").click(function() {
+                $.extend(ballotData, {"measure_type":"measure"});
+            });
+            $("#election-button").click(function() {
+                $.extend(ballotData, {"measure_type":"election"});
+            });
+
+            /* Election:Office */
+            $("#office-input").change(function() {
+                $.extend(ballotData, {"office":$(this).val()});
+            });
+
+        </script>
+        <script>
+            /* ballotData["candidates"] will be an array of candidate objects.
+                candidate objects will be of the {"name":"","party":""} form. */
+
+            // Return an array without any objects that match on both name and party fields.
+            function filterByAttribute(item) {
+                if (item.name != candidateName && item.party != candidateParty){                        return item;
+                };
+            };
+
+            /* Delete candidateObject from ballotData["candidates"] and delete the row
+                from candidates-table. */
+            function deleteCandidateRow(){
+                // Extract candidate name and party from html table row.
+                candidateParty = $(this).siblings(".candidateParty").html();
+                candidateName = $(this).siblings(".candidateName").html();
+                // Delete candidateObjects that match on candidate name and party.
+                ballotData["candidates"] = ballotData["candidates"].filter(filterByAttribute);
+                // Delete row from html table.
+                $(this).parent().remove();
+            };
+
+            /* Build row of candidate data with a delete button and add it to the
+                candidate-table. */
+            function addCandidateRow(name, party){
+                // Create Row
+                var candidateRow = $("<tr></tr>");
+                // Add name and party data.
+                candidateRow.append($("<td class=\"candidateName\"></td>").text(name));
+                candidateRow.append($("<td class=\"candidateParty\"></td>").text(party));
+                // Add delete button.
+                candidateRow.append("<button class=\"delete-candidate-button\">delete</button>");
+                // Append the just built row to candidate-table.
+                $("#candidate-table").append(candidateRow);
+            };
+
+            // Initialize current candidateObject.
+            var candidateObject = {};
+
+            /* When data is entered into the candidate-name or candidate party inputs, add it
+                to the current candidateObject */
+            $("#candidate-name-input").change(function(){
+                $.extend(candidateObject, {"name":$(this).val()} );
+            });
+            $("#candidate-party-input").change(function(){
+                $.extend(candidateObject, {"party":$(this).val()} );
+            });
+
+            /* Clicking the add-candidate-button will add the candidateObject to the 
+                ballotData["candidates"] array. It will then clear the candidateObject and
+                the candidate-* input boxes to be ready for the entry of the next candidate.
+                It will also create a new row in the candidate-table for the data entered. */
+            $("#add-candidate-button").click(function(){
+                console.log("The add-candidate-button was clicked.");
+                // Check if the candidateObject is populated. If it isn't, do nothing.
+                if($.isEmptyObject(candidateObject) != true){
+                    // Add the candidateObject to the ballotData["candidates"] array.
+                    ballotData["candidates"].push(candidateObject);
+                    console.log("This candidate was added to the ballotData[\"candidates\"] array: ", candidateObject);
+
+                    // Reset our text boxes to be blank.
+                    $("#candidate-name-input").val('');
+                    $("#candidate-party-input").val('');
+                    console.log([ballotData]);
+                    
+                    // Add row to candidate-table.
+                    addCandidateRow(candidateObject["name"], candidateObject["party"]);
+
+                    // Reset the candidateObject to be empty.
+                    candidateObject = {};
+
+                    // Set callback for delete-candidate-button.
+                    $(".delete-candidate-button").click(deleteCandidateRow);
+                };    
+            });        
+        </script>
+    </body>
+</html>
