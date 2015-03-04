@@ -8,19 +8,17 @@
         <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
     </head>
     <body>
-        <div id="measures"></div>
+        <div id="measures-div">
+            <ul id="measures-ul"></ul>
+        </div>
         <div id="full-JSON"></div>
         <script>
+            console.log("Start of Script.")
             var url = "http://50.116.6.242/measures/?coords=37.7813,-122.4562&election_dates=2014-11-04";
-            var measure_data = $.getJSON(url);
-            measure_data.done(function(data){
-                console.log("Got the DATA!!!11!");
-                $("#full-JSON").text("SamBob");
-                $.each( data, function(i,item) {
-                    console.log("another item");
-                    console.log($.parseJSON(item));
-                    console.log(typeof item);
-                    $( "<li></li>" ).text($.parseJSON(item)["info"]).appendTo( "#measures" );
+            $.getJSON(url, function(measure_data){
+                $.each(measure_data, function(index, measure_object){
+                    console.log(measure_object["title"]);
+                    $("#measures-ul").append("<li>"+measure_object["title"]+"</li>");
                 });
             });
         </script>
